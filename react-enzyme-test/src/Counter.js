@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Profile from './Profile'
 
 class Counter extends Component {
   state = {
@@ -23,6 +24,7 @@ class Counter extends Component {
         <h2>{this.state.number}</h2>
         <button onClick={this.handleIncrease}>+1</button>
         <button onClick={this.handleDecrease}>-1</button>
+        <Profile username="tintoll" name="화니" />
       </div>
     )
   }

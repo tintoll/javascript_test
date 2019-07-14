@@ -5,7 +5,7 @@ import Profile from './Profile';
 describe('<Profile />', () => {
 
   it('matches snapshot', () => {
-    // Enzyme 을 통하여 리액트 컴포넌트를 렌더링 해줍니다.
+    // mount함수는 Enzyme 을 통하여 리액트 컴포넌트를 렌더링 해줍니다.
     const wrapper = mount(<Profile username="tintoll" name="화니" />);
     expect(wrapper).toMatchSnapshot();
   });

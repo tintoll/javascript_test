@@ -1,10 +1,10 @@
 import React from 'react';
-import Profile from "./Profile";
+import Counter from "./Counter";
 
 function App() {
   return (
     <div>
-      <Profile username="tintoll" name="화니" />
+      <Counter />
     </div>
   );
 }
