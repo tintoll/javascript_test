@@ -30,4 +30,37 @@ describe('<Counter />', () => {
     expect(wrapper.state().number).toBe(-1);
   });
 
+  it('calls handleIncrease', () => {
+    // 클릭이벤트를 시뮬레이트 하고 state를 확인 
+    const wrapper = shallow(<Counter />);
+    const plusButton = wrapper.findWhere(
+      node => node.type() === 'button' && node.text() === '+1'
+    );
+    plusButton.simulate('click');
+    expect(wrapper.state().number).toBe(1);
+  });
+
+  it('calls handleDecrease', () => {
+    // 클릭이벤트를 시뮬레이트 하고 h2태의 텍스를 확인
+    const wrapper = shallow(<Counter />);
+    // findWhere 함수를 사용하면 원하는 조건을 만족하는 태그를 선택할 수 있다.
+    const minuxButton = wrapper.findWhere(
+      node => node.type() === 'button' && node.text() === '-1'
+    );
+    // 이벤트를 시뮬레이트 할때에는 원하는 엘리먼트를 찾아서 simulate()함수를 사용합니다.
+    // 첫번째는 이벤트이름, 두번째는 이벤트 객체를 넣습니다.
+    /*
+      // input의 change이벤트일 경우 
+      input.simulate('change', {
+        target: {
+          value: 'hello world'
+        }
+      });
+    */
+
+    minuxButton.simulate('click');
+    const number = wrapper.find('h2');
+    expect(number.text()).toBe('-1');
+  });
+
 });
