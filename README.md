@@ -281,4 +281,118 @@ import '@testing-library/react/cleanup-after-each';
 import '@testing-library/jest-dom/extend-expect';
 ```
 
-#### 
+####  스냅샷 테스트
+
+```javascript
+import React from 'react';
+import { render } from "@testing-library/react";
+import Profile from './Profile';
+
+describe('<Profile />', () => {
+  it('matches snapshot', () => {
+    const utils = render(<Profile username="velopert" name="김민준" />);
+    expect(utils.container).toMatchSnapshot();
+  });
+
+  it('shows the props correctly', () => {
+    const utils = render(<Profile username="velopert" name="김민준" />);
+    utils.getByText('velopert!'); //  velopert라는 텍스트를 가진 엘리먼트가 있는지 확인
+    utils.getByText('(김민준)');//  (김민준)라는 텍스트를 가진 엘리먼트가 있는지 확인
+    utils.getByText(/김/); // 정규식 /김/ 을 통과하는 엘리먼트가 있는지 확인 
+  });
+});
+```
+
+#### 다양한 쿼리
+
+`render` 함수를 실행하고 나면 그 결과물 안에는 [다양한 쿼리](https://testing-library.com/docs/dom-testing-library/api-queries) 함수들이 있다. 이 쿼리 함수들은 `Variant` 와 `Queries` 의 조합으로 네이밍이 이루져 있다. 
+너무 많아서 추천하는 쿼리만 사용하면 될듯 하다.  
+
+1. getByLabelText
+
+   1. label 이 있는 input 의 label 내용으로 input 을 선택합니다.
+
+      ```javascript
+      <label for="username-input">아이디</label>
+      <input id="username-input" />
+      
+      const inputNode = getByLabelText('아이디');
+      ```
+
+2. getByPlaceholderText
+
+   1. placeholder 값으로 input 및 textarea 를 선택합니다.
+
+      ```javascript
+      <input placeholder="아이디" />;
+      
+      const inputNode = getByPlaceholderText('아이디');
+      ```
+
+3. getByText
+
+   1. 엘리먼트가 가지고 있는 텍스트 값으로 DOM 을 선택합니다.
+
+      ```javascript
+      <div>Hello World!</div>;
+      
+      const div = getByText('Hello World!');
+      ```
+
+4. getByDisplayValue
+
+   1. `input`, `textarea`, `select` 가 지니고 있는 현재 값을 가지고 엘리먼트를 선택합니다.
+
+      ```javascript
+      <input value="text" />;
+      
+      const input = getByDisplayValue('text');
+      ```
+
+5. getByAltText
+
+   1. `alt` 속성을 가지고 있는 엘리먼트 (주로 `img`) 를 선택합니다.
+
+      ```javascript
+      <img src="/awesome.png" alt="awesome image" />;
+      
+      const imgAwesome = getByAltText('awesomse image');
+      ```
+
+6. getByTitle
+
+   1. `title` 속성을 가지고 있는 DOM 혹은 `title` 엘리먼트를 지니고있는 SVG 를 선택 할 때 사용합니다.
+
+7. getByRole
+
+   1.  특정 `role` 값을 지니고 있는 엘리먼트를 선택합니다.
+
+      ```javascript
+      <span role="button">삭제</span>;
+      
+      const spanRemove = getByRole('button');
+      ```
+
+8. getByTestId
+
+   1. 다른 방법으로 못 선택할때 사용하는 방법인데요, 특정 DOM 에 직접 test 할 때 사용할 id 를 달아서 선택하는 것을 의미합니다.
+
+      ```javascript
+      <div data-testid="commondiv">흔한 div</div>;
+      
+      const commonDiv = getByTestId('commondiv');
+      ```
+
+      
+
+#### 이벤트 
+
+`fireEvent()`함수는 이벤트를 발생시켜줍니다. 사용법은 다음과 같습니다.
+
+```javascript
+fireEvent.이벤트이름(DOM, 이벤트객체);
+fireEvent.change(myInput, { target: { value: 'hello world' } });
+```
+
+
+
