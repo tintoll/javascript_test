@@ -395,4 +395,33 @@ fireEvent.change(myInput, { target: { value: 'hello world' } });
 ```
 
 
+#### jest.fn()
+jest.fn()함수는 jest에서 제공하는 mock함수이다. 이 함수를 사용하면 이 함수가 호출된 다음 toBeCalled, toBeCalledWith와 같은 matcher를 사용하여 함수가 호출됐는지, 호출됐으면 어떤 파라미터로 호출됐는지 쉽게 확인 할수 있습니다.
 
+```javascript
+it('calls onInsert and clears input', () => {
+  const onInsert = jest.fn(); 
+  const { input, button } = setup({ onInsert });
+  // 테스트 코드를 작성 할 때에는 마치 사용자가 된 입장으로,아래와 같은 흐름으로 작성하면 된다.
+  // 글자입력하고  
+  fireEvent.change(input, {
+    target: {
+      value: 'TDD 배우기'
+    }
+  });
+  // 등록 버튼클릭
+  fireEvent.click(button);
+  expect(onInsert).toBeCalledWith('TDD 배우기'); // onInsert 가 'TDD 배우기' 파라미터가 호출됐어야함
+  expect(input).toHaveAttribute('value',''); // input이 비워져야함.
+})
+```
+
+#### toHaveStyle()
+- toHaveStyle 이라는 matcher 함수를 사용하면 해당 DOM 에 특정 스타일이 있는지 쉽게 확인 할 수 있습니다.
+- not 이라는 키워드는 특정 조건이 만족하지 않아야 함을 의미 
+```javascript
+it('shows line-through on span when done is false', () => {
+  const { span } = setup({ todo: { ...sampleTodo, done: false } });
+  expect(span).not.toHaveStyle('text-decoration: line-through;');
+});
+```
