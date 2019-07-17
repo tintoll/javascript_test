@@ -425,3 +425,13 @@ it('shows line-through on span when done is false', () => {
   expect(span).not.toHaveStyle('text-decoration: line-through;');
 });
 ```
+
+#### toBeInTheDocument()
+- toBeInTheDocument 이라는 matcher 함수를 사용하면 특정 엘리먼트가 화면에서 사라졌는지 확인할 수 있습니다.  
+```javascript
+expect(todoText).not.toBeInTheDocument();
+
+// 다른 toBeInTheDocument함수를 사용하지 않고 표현하기 
+const removedText = queryByText('TDD 배우기');
+expect(removedText).toBeNull();
+```
