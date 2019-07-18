@@ -435,3 +435,151 @@ expect(todoText).not.toBeInTheDocument();
 const removedText = queryByText('TDD 배우기');
 expect(removedText).toBeNull();
 ```
+
+### 비동기 작업 테스트 
+
+- 비동기 테스트를 하기 위해서는 react-testing-library에서 지원하는 Async Utilities함수들을 사용하면 된다.
+
+#### Async Utilities 함수들
+##### wait
+- 특정 콜백에서 에러를 발생하지 않을 때 까지 대기하는 함수 
+```javascript
+it('reveals text wheen toggle is ON', async () => {
+  const { getByText } = render(<DelayedToggle />);
+  const toggleButton = getByText('토글');
+  fireEvent.click(toggleButton);
+  // 콜백 안의 함수가 에러가 발생시키지 않을때 까지 기다립니다.
+  // timeout 기본값은 4500ms 이다. 
+  await wait( () => getByText('야호!!'), {timeout : 3000}); 
+
+});
+```
+
+##### waitForElement
+-  특정 엘리먼트가, 나타났거나, 바뀌었거나, 사라질때까지 대기를 해줍니다. 그리고 프로미스가 끝날 때 우리가 선택한 엘리먼트를 resolve 합니다.
+```javascript
+it('toggles text ON/OFF', async () => {
+  const { getByText } = render(<DelayedToggle />);
+  const toggleButton = getByText('토글');
+  fireEvent.click(toggleButton);
+  // waitForElement 함수는 특정 엘리먼트가, 나타났거나, 바뀌었거나, 사라질때까지 대기를 해줍니다. 
+  // 프로미스가 끝날때 우리가 선택한 엘리먼트를 resolve한다.
+  const text = await waitForElement(() => getByText('ON'));
+  expect(text).toHaveTextContent('ON');
+});
+```
+
+##### waitForDomChange
+- 콜백함수가 아니라 검사하고 싶은 엘리먼트를 넣어주면 해당 엘리먼트에서 변화가 발생 할 때 까지 기다립니다. 프로미스가 resolve 됐을땐 mutationList를 반환하여 DOM이 어떻게 바뀌었는지에 대한 정보를 알수 있다.
+```javascript
+it('changes something when button is clicked', async () => {
+  const { getByText, container } = render(<DelayedToggle />);
+  const toggleButton = getByText('토글');
+  fireEvent.click(toggleButton);
+  // waitForDomChange는 콜백함수가 아니라 검사하고 싶은 엘리먼트를 넣어주면 해당 엘리먼트에서 변화가 발생할 때까지 기다려줍니다.
+  const mutations = await waitForDomChange({container});
+  // 프로미스가 resolve됐을때 mutationList를 반환하여 DOM이 어떻게 바뀌었는지에 대한 정보를 알수 있다.
+  // console.log(mutations);
+});
+```
+
+##### waitForElementToBeRemoved
+- 특정 엘리먼트가 화면에서 사라질때까지 기다리는 함수입니다.
+
+```javascript
+t('removes text when toggle is OFF', async () => {
+  const { getByText, container } = render(<DelayedToggle />);
+  const toggleButton = getByText('토글');
+  fireEvent.click(toggleButton);
+
+  await waitForDomChange({container}); //  ON이 됨
+  getByText('야호!!');
+  fireEvent.click(toggleButton);
+  // waitForElementToBeRemove는 특정 엘리먼트가 화면에서 사라질때까지 기다리는 함수입니다.
+  await waitForElementToBeRemoved( () => getByText('야호!!'));
+
+});
+```
+
+
+#### REST-API 호출 테스트 
+- Rest API를 호출해야하는 경우에는 API를 직접 호출하지 않고 이를 mocking 합니다.
+
+##### axios-mock-adapter 이용한 테스트 
+- MockAdapter 를 사용하면 특정 API 요청이 발생했을 때 어떤 응답이 와야 하는지 직접 정의해줄 수 있습니다.
+- delayResponse 옵션을 설정하면 딜레이를 임의적으로 설정할 수 있습니다. 이 설정은 없어도 상관 없습니다.
+
+```javascript
+describe('<UserProfile />', () => {
+  const mock = new MockAdapter(axios, { delayResponse : 200}) // 200ms 가짜 딜레이 설정
+  // API 요청에 대하여 응답 미리 정하기 
+  mock.onGet('https://jsonplaceholder.typicode.com/users/1').reply(200, {
+    id: 1,
+    name: 'Leanne Graham',
+    username: 'Bret',
+    email: 'Sincere@april.biz',
+    address: {
+      street: 'Kulas Light',
+      suite: 'Apt. 556',
+      city: 'Gwenborough',
+      zipcode: '92998-3874',
+      geo: {
+        lat: '-37.3159',
+        lng: '81.1496'
+      }
+    },
+    phone: '1-770-736-8031 x56442',
+    website: 'hildegard.org',
+    company: {
+      name: 'Romaguera-Crona',
+      catchPhrase: 'Multi-layered client-server neural-net',
+      bs: 'harness real-time e-markets'
+    }
+  });
+
+
+  it('calls getUser API loads userData properly', async () => {
+    const { getByText } = render(<UserProfile id={1} />);
+    await waitForElement(() => getByText('로딩중...')); // 로딩중.. 문구 보여줘야함
+    await waitForElement(() => getByText('Bret')); // Bret (username) 을 보여줘야함
+  });
+});
+```
+
+
+##### axios-mock-adapter 활용
+###### 한번에 mocking하기 - replyOnce
+```javascript
+mock.onGet('/users').replyOnce(200, users);
+```
+이렇게 하면 요청을 딱 한번만 mocking 할 수 있습니다. 한번 요청을 하고 나면 그 다음 요청은 정상적으로 요청이 됩니다.
+
+###### replyOnce 를 연달아서 사용하기
+```javascript
+mock
+  .onGet('/users')
+  .replyOnce(200, users) // 첫번째 요청
+  .onGet('/users')
+  .replyOnce(500); // 두번째 요청
+```
+이렇게 하면 첫번째 요청과 두번째 요청을 연달아서 설정 할 수 있습니다. 요청을 여러번 해야 하는 경우 이런 형태로 구현하시면 됩니다.
+
+###### 아무 요청이나 mocking 하기 - onAny()
+보통 메서드에 따라 onGet(), onPost() 이런식으로 사용하는데요, onAny() 를 사용하면 어떤 메서드던 mocking 을 할 수 있습니다.
+```javascript
+mock.onAny('/foo').reply(200);
+// 주소를 생략하면 어떤 주소든 mocking 합니다.
+mock.onAny().reply(200);
+```
+
+###### reset 과 restore
+reset은 mock 인스턴스에 등록된 모든 mock 핸들러를 제거합니다. 만약에 테스트 케이스별로 다른 mock 설정을 하고 싶으시면 이 함수를 사용하시면 됩니다.
+```javascript
+mock.reset();
+```
+
+restore은 axios 에서 mocking 기능을 완전히 제거합니다. 만약에 실제 테스트를 하다가 요청이 실제로 날라가게 하고 싶으면 이 함수를 사용하면 됩니다.
+
+```javascript
+mock.restore();
+```
